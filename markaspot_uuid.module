@@ -1,0 +1,110 @@
+<?php
+
+/**
+ * @file
+ * Contains markaspot_uuid.module.
+ */
+use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\markaspot_uuid\plugin\uuid\MarkaspotUuid;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\taxonomy\Entity\Term;
+
+/**
+ * Implements hook_help().
+ */
+function markaspot_uuid_help($route_name, RouteMatchInterface $route_match) {
+  switch ($route_name) {
+    // Main module help for the markaspot_uuid module.
+    case 'help.page.markaspot_uuid':
+      $output = '';
+      $output .= '<h3>' . t('About') . '</h3>';
+      $output .= '<p>' . t('Override UUID service') . '</p>';
+
+      $uuid = new MarkaspotUuid();
+      $output .= '<p>'. $uuid->generate() .'</p>';
+      return $output;
+
+    default:
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function markaspot_uuid_theme() {
+  $theme = [];
+
+  return $theme;
+}
+
+
+
+
+/**
+ * Implements hook_node_update().
+ *
+ * Need to update the title field with UUID
+ */
+function markaspot_uuid_node_update(EntityInterface  $node) {
+
+  if ($node->bundle() == 'report') {
+    // Instead of contributed module auto entity_title:
+    // Get the service name by ID and update the title field.
+    $tid = $node->field_category[LANGUAGE_NONE][0]['tid'];
+    $service = taxonomy_term_load($tid);
+    return markaspot_uuid_update_title($node, $service);
+  }
+}
+
+
+
+/**
+ * Implements hook_node_insert().
+ *
+ * Need to update the title field with UUID
+ */
+function markaspot_uuid_entity_presave(EntityInterface $node) {
+
+  if ($node->bundle() == 'service_request') {
+
+    // Instead of contributed module auto entity_title:
+    // Get the service name by ID and update the title field.
+    if (isset($node->field_category->target_id)){
+      $service_name = Term::load($node->field_category->target_id)->get('name')->value;
+      // http://drupalapi.de/api/drupal/drupal%21core%21modules%21taxonomy%21taxonomy.module/function/taxonomy_term_load/drupal-8
+    }
+    $node->title = $node->uuid() . ' ' . $service_name;
+
+  }
+}
+
+/**
+ * Generating a title.
+ *
+ * @param object $node
+ *   The node object
+ *
+ * @param object $service
+ *   The term by $tid
+ */
+function markaspot_uuid_update_title(EntityInterface $node, $service) {
+  // $title_pattern = variable_get('markaspot_logic_title_pattern', 0);
+  // dpm($node->uuid());
+  $uuid_service = new MarkaspotUuid();
+  $uuid = $uuid_service->generate();
+
+  db_update('node')
+    ->fields(array(
+      'uuid' => $uuid,
+    ))
+    ->condition('nid',$node->id(),'=')
+    ->execute();
+  db_update('node_field_data')
+    ->fields(array(
+      'title' => $uuid . " " . $service,
+    ))
+    ->condition('nid',$node->id(),'=')
+    ->execute();
+
+  return true;
+}
