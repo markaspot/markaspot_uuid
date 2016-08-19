@@ -4,7 +4,7 @@ namespace Drupal\markaspot_uuid;
 use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\DependencyInjection\ServiceProviderBase;
 
-class MarkaspotUuidServiceProvider extends ServiceProviderBase {
+class MarkaspotuuidServiceProvider extends ServiceProviderBase {
 
   /**
    * {@inheritdoc}
