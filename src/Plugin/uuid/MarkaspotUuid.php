@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains Drupal\markaspot_uuid_module\MarkaspotUuidServiceProvider
- */
 
 namespace Drupal\markaspot_uuid\plugin\uuid;
 

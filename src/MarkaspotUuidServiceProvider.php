@@ -10,7 +10,7 @@ class MarkaspotuuidServiceProvider extends ServiceProviderBase {
    * {@inheritdoc}
    * https://www.drupal.org/node/2026959
    */
-  public function register(ContainerBuilder $container) {
+  public function alter(ContainerBuilder $container) {
     // Overrides uuid class to provide customizable uuids.
     $definition = $container->getDefinition('uuid');
     $definition->setClass('Drupal\markaspot_uuid\plugin\uuid\MarkaspotUuid');
