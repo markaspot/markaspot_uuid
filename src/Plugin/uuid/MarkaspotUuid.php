@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\markaspot_uuid\plugin\uuid;
+namespace Drupal\markaspot_uuid\Plugin\Uuid;
 
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Uuid\UuidInterface;
