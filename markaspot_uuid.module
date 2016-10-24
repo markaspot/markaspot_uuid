@@ -5,8 +5,8 @@
  * Contains markaspot_uuid.module.
  */
 
-use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Entity\EntityInterface;
+use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\taxonomy\Entity\Term;
 
 /**
@@ -31,7 +31,6 @@ function markaspot_uuid_help($route_name, RouteMatchInterface $route_match) {
  */
 function markaspot_uuid_theme() {
   $theme = [];
-
   return $theme;
 }
 
@@ -40,9 +39,9 @@ function markaspot_uuid_theme() {
  *
  * Need to update the title field with UUID
  */
-function markaspot_uuid_node_update(EntityInterface  $node) {
+function markaspot_uuid_node_update(EntityInterface $node) {
 
-  if ($node->bundle() == 'report') {
+  if ($node->bundle() == 'service_request') {
     // Instead of contributed module auto entity_title:
     // Get the service name by ID and update the title field.
     $tid = $node->field_category[LANGUAGE_NONE][0]['tid'];
@@ -52,11 +51,8 @@ function markaspot_uuid_node_update(EntityInterface  $node) {
 }
 
 
-
 /**
- * Implements hook_node_insert().
- *
- * Need to update the title field with UUID
+ * Implements hook_entity_presave).
  */
 function markaspot_uuid_entity_presave(EntityInterface $node) {
 
@@ -64,8 +60,9 @@ function markaspot_uuid_entity_presave(EntityInterface $node) {
 
     // Instead of contributed module auto entity_title:
     // Get the service name by ID and update the title field.
-    if (isset($node->field_category->target_id)){
-      $service_name = Term::load($node->field_category->target_id)->get('name')->value;
+    if (isset($node->field_category->target_id)) {
+      $service_name = Term::load($node->field_category->target_id)
+        ->get('name')->value;
       // http://drupalapi.de/api/drupal/drupal%21core%21modules%21taxonomy%21taxonomy.module/function/taxonomy_term_load/drupal-8
     }
     $node->title = $node->uuid() . ' ' . $service_name;
@@ -81,6 +78,8 @@ function markaspot_uuid_entity_presave(EntityInterface $node) {
  *
  * @param object $service
  *   The term by $tid
+ *
+ * @return boolean
  */
 function markaspot_uuid_update_title(EntityInterface $node, $service) {
   // $title_pattern = variable_get('markaspot_logic_title_pattern', 0);
@@ -92,14 +91,14 @@ function markaspot_uuid_update_title(EntityInterface $node, $service) {
     ->fields(array(
       'uuid' => $uuid,
     ))
-    ->condition('nid',$node->id(),'=')
+    ->condition('nid', $node->id(), '=')
     ->execute();
   db_update('node_field_data')
     ->fields(array(
       'title' => $uuid . " " . $service,
     ))
-    ->condition('nid',$node->id(),'=')
+    ->condition('nid', $node->id(), '=')
     ->execute();
 
-  return true;
+  return TRUE;
 }
