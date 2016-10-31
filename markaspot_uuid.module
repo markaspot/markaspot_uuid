@@ -35,23 +35,6 @@ function markaspot_uuid_theme() {
 }
 
 /**
- * Implements hook_node_update().
- *
- * Need to update the title field with UUID
- */
-function markaspot_uuid_node_update(EntityInterface $node) {
-
-  if ($node->bundle() == 'service_request') {
-    // Instead of contributed module auto entity_title:
-    // Get the service name by ID and update the title field.
-    $tid = $node->field_category[LANGUAGE_NONE][0]['tid'];
-    $service = taxonomy_term_load($tid);
-    return markaspot_uuid_update_title($node, $service);
-  }
-}
-
-
-/**
  * Implements hook_entity_presave).
  */
 function markaspot_uuid_entity_presave(EntityInterface $node) {
