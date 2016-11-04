@@ -53,13 +53,13 @@ class MarkaspotUuid implements UuidInterface {
         $time_hi_and_version, $clock_seq_hi_and_reserved,
         $clock_seq_low, $nodes);
 
-      $uuid = $date_prefix . $next_id . $uuid . $date_suffix;
+      // $uuid = $date_prefix . $next_id . $uuid . $date_suffix;
 
     } else {
 
       $hex = substr(hash('sha256', Crypt::randomBytes(2)), 0, 2);
 
-      $uuid = $date_prefix .'-' .$hex .'-'. $next_id;
+      $uuid = '#' . $next_id .'-' .$hex .'-'. $date_prefix;
 
     }
     return $uuid;
