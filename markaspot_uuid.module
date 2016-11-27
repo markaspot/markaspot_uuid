@@ -35,7 +35,7 @@ function markaspot_uuid_theme() {
 }
 
 /**
- * Implements hook_entity_presave).
+ * Implements hook_entity_presave.
  */
 function markaspot_uuid_entity_presave(EntityInterface $node) {
 
@@ -48,7 +48,7 @@ function markaspot_uuid_entity_presave(EntityInterface $node) {
         ->get('name')->value;
       // http://drupalapi.de/api/drupal/drupal%21core%21modules%21taxonomy%21taxonomy.module/function/taxonomy_term_load/drupal-8
     }
-    $node->title = $node->uuid() . ' ' . $service_name;
+    $node->title = '#' . $node->uuid() . ' ' . $service_name;
 
   }
 }
@@ -59,7 +59,7 @@ function markaspot_uuid_entity_presave(EntityInterface $node) {
  * @param object $node
  *   The node object
  *
- * @param object $service
+ * @param string $service
  *   The term by $tid
  *
  * @return boolean

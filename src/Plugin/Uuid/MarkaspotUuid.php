@@ -21,7 +21,7 @@ class MarkaspotUuid implements UuidInterface {
   public function generate() {
 
     $next_id = $this->getLastNid() + 1;
-    $date_suffix = $date_prefix = date('dmY', time());
+    // $date_suffix = $date_prefix = date('dmY', time());
 
     $controller = \Drupal::request()->get('_controller');
     if (!strstr($controller, 'node') && !strstr($controller, 'markaspot_open311')) {
@@ -59,7 +59,7 @@ class MarkaspotUuid implements UuidInterface {
 
       $hex = substr(hash('sha256', Crypt::randomBytes(2)), 0, 2);
 
-      $uuid = '#' . $next_id .'-' .$hex .'-'. $date_prefix;
+      $uuid = $next_id . '-' .$hex;
 
     }
     return $uuid;
