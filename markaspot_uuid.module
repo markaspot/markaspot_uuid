@@ -7,7 +7,6 @@
 
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\Core\Routing\RouteMatchInterface;
-use Drupal\taxonomy\Entity\Term;
 
 /**
  * Implements hook_help().
@@ -35,53 +34,22 @@ function markaspot_uuid_theme() {
 }
 
 /**
- * Implements hook_entity_presave.
+ * Implements hook_entity_presave().
  */
 function markaspot_uuid_entity_presave(EntityInterface $node) {
 
   if ($node->bundle() == 'service_request') {
-
+    $tid = $node->field_category->target_id;
     // Instead of contributed module auto entity_title:
     // Get the service name by ID and update the title field.
-    if (isset($node->field_category->target_id)) {
-      $service_name = Term::load($node->field_category->target_id)
-        ->get('name')->value;
-      // http://drupalapi.de/api/drupal/drupal%21core%21modules%21taxonomy%21taxonomy.module/function/taxonomy_term_load/drupal-8
+    if (isset($tid)) {
+
+      $service_name = \Drupal::entityTypeManager()
+        ->getStorage('taxonomy_term')
+        ->load($tid);
+      $node->title = '#' . $node->uuid() . '  ' . $service_name->label();
+
     }
-    $node->title = '#' . $node->uuid() . ' ' . $service_name;
 
   }
-}
-
-/**
- * Generating a title.
- *
- * @param object $node
- *   The node object
- *
- * @param string $service
- *   The term by $tid
- *
- * @return boolean
- */
-function markaspot_uuid_update_title(EntityInterface $node, $service) {
-  // $title_pattern = variable_get('markaspot_logic_title_pattern', 0);
-  // dpm($node->uuid());
-  $uuid_service = new \Drupal\markaspot_uuid\Plugin\Uuid\MarkaspotUuid();
-  $uuid = $uuid_service->generate();
-
-  db_update('node')
-    ->fields(array(
-      'uuid' => $uuid,
-    ))
-    ->condition('nid', $node->id(), '=')
-    ->execute();
-  db_update('node_field_data')
-    ->fields(array(
-      'title' => $uuid . " " . $service,
-    ))
-    ->condition('nid', $node->id(), '=')
-    ->execute();
-
-  return TRUE;
 }

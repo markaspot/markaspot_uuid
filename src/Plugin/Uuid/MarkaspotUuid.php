@@ -5,7 +5,6 @@ namespace Drupal\markaspot_uuid\Plugin\Uuid;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Uuid\UuidInterface;
 
-
 /**
  * Generates a UUID v4 using PHP code.
  *
@@ -21,13 +20,16 @@ class MarkaspotUuid implements UuidInterface {
   public function generate() {
 
     $next_id = $this->getLastNid() + 1;
-    // $date_suffix = $date_prefix = date('dmY', time());
+    $config = \Drupal::configFactory()
+      ->getEditable('markaspot_uuid.settings');
+    $uuidOffset = $config->get('offset');
 
+    $next_id = ($next_id - $uuidOffset > 0) ? $next_id - $uuidOffset : $next_id;
+
+    // $date_suffix = $date_prefix = date('dmY', time());
     $controller = \Drupal::request()->get('_controller');
     if (!strstr($controller, 'node') && !strstr($controller, 'markaspot_open311')) {
       $pattern = '%s-%s-%s-%02x%s-%s';
-
-
 
       $hex = substr(hash('sha256', Crypt::randomBytes(16)), 0, 32);
 
@@ -46,31 +48,31 @@ class MarkaspotUuid implements UuidInterface {
       $clock_seq_low = substr($hex, 20, 2);
       $nodes = substr($hex, 3);
 
-
-
       $uuid = sprintf($pattern,
         $time_low, $time_mid,
         $time_hi_and_version, $clock_seq_hi_and_reserved,
         $clock_seq_low, $nodes);
 
-      // $uuid = $date_prefix . $next_id . $uuid . $date_suffix;
-
-    } else {
+      // $uuid = $date_prefix . $next_id . $uuid . $date_suffix;.
+    }
+    else {
 
       $hex = substr(hash('sha256', Crypt::randomBytes(2)), 0, 2);
 
-      $uuid = $next_id . '-' .$hex;
+      $uuid = $next_id . '-' . $hex;
 
     }
     return $uuid;
 
   }
 
-
   /**
+   * Receive the last inserted node id.
+   *
    * @return int
+   *   the node id.
    */
-  protected function getLastNid (){
+  protected function getLastNid() {
     $last_id = db_query('SELECT MAX(nid) FROM {node}')->fetchField();
     return $last_id;
   }

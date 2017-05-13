@@ -34,13 +34,19 @@ class MarkaspotUuidSettingsForm extends ConfigFormBase {
     $form['markaspot_uuid']['format'] = array(
       '#type' => 'textfield',
       '#title' => $this->t('PHP Date Format'),
-      '#default_value' => 'yymmdd',
+      '#default_value' => $config->get('format'),
       '#description' => t('The format of the outputted date string'),
+    );
+
+    $form['markaspot_uuid']['offset'] = array(
+      '#type' => 'number',
+      '#title' => $this->t('Offset'),
+      '#default_value' => $config->get('offset'),
+      '#description' => t('Start counting service requests from zero by defining an offset'),
     );
 
     return parent::buildForm($form, $form_state);
   }
-
 
   /**
    * {@inheritdoc}
@@ -50,6 +56,7 @@ class MarkaspotUuidSettingsForm extends ConfigFormBase {
 
     $this->config('markaspot_uuid.settings')
       ->set('format', $values['format'])
+      ->set('offset', $values['offset'])
       ->save();
 
     parent::submitForm($form, $form_state);
@@ -63,5 +70,5 @@ class MarkaspotUuidSettingsForm extends ConfigFormBase {
       'markaspot_uuid.settings',
     ];
   }
-}
 
+}
