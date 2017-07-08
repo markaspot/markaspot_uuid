@@ -19,12 +19,7 @@ class MarkaspotUuid implements UuidInterface {
    */
   public function generate() {
 
-    $next_id = $this->getLastNid() + 1;
-    $config = \Drupal::configFactory()
-      ->getEditable('markaspot_uuid.settings');
-    $uuidOffset = $config->get('offset');
 
-    $next_id = ($next_id - $uuidOffset > 0) ? $next_id - $uuidOffset : $next_id;
 
     // $date_suffix = $date_prefix = date('dmY', time());
     $controller = \Drupal::request()->get('_controller');
@@ -56,6 +51,13 @@ class MarkaspotUuid implements UuidInterface {
       // $uuid = $date_prefix . $next_id . $uuid . $date_suffix;.
     }
     else {
+
+      $next_id = $this->getLastNid() + 1;
+      $config = \Drupal::configFactory()
+        ->getEditable('markaspot_uuid.settings');
+      $uuidOffset = $config->get('offset');
+
+      $next_id = ($next_id - $uuidOffset > 0) ? $next_id - $uuidOffset : $next_id;
 
       $hex = substr(hash('sha256', Crypt::randomBytes(2)), 0, 2);
 
