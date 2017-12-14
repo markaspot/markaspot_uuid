@@ -2,6 +2,7 @@
 
 namespace Drupal\markaspot_uuid\Plugin\Uuid;
 
+use Drupal\node\Entity\Node;
 use Drupal\Component\Utility\Crypt;
 use Drupal\Component\Uuid\UuidInterface;
 
@@ -19,11 +20,29 @@ class MarkaspotUuid implements UuidInterface {
    */
   public function generate() {
 
-
-
     // $date_suffix = $date_prefix = date('dmY', time());
-    $controller = \Drupal::request()->get('_controller');
-    if (!strstr($controller, 'node') && !strstr($controller, 'markaspot_open311')) {
+    $request = \Drupal::request();
+    $controller = $request->get('_controller');
+    $node_type = $request->get('node_type');
+
+    $content_type = method_exists($node_type, 'get') ? $node_type->get('type') : '';
+
+    if ($node_type === 'service_request' || $content_type == 'service_request' || strstr($controller,'markaspot_open311')) {
+
+      $next_id = $this->getLastNid() + 1;
+      $config = \Drupal::configFactory()->getEditable('markaspot_uuid.settings');
+      $uuidOffset = $config->get('offset');
+
+      $next_id = ($next_id - $uuidOffset > 0) ? $next_id - $uuidOffset : $next_id;
+
+      $hex = substr(hash('sha256', Crypt::randomBytes(2)), 0, 2);
+
+      $uuid = $next_id . '-' . $hex;
+
+      // $uuid = $date_prefix . $next_id . $uuid . $date_suffix;.
+    }
+    else {
+
       $pattern = '%s-%s-%s-%02x%s-%s';
 
       $hex = substr(hash('sha256', Crypt::randomBytes(16)), 0, 32);
@@ -48,21 +67,6 @@ class MarkaspotUuid implements UuidInterface {
         $time_hi_and_version, $clock_seq_hi_and_reserved,
         $clock_seq_low, $nodes);
 
-      // $uuid = $date_prefix . $next_id . $uuid . $date_suffix;.
-    }
-    else {
-
-      $next_id = $this->getLastNid() + 1;
-      $config = \Drupal::configFactory()
-        ->getEditable('markaspot_uuid.settings');
-      $uuidOffset = $config->get('offset');
-
-      $next_id = ($next_id - $uuidOffset > 0) ? $next_id - $uuidOffset : $next_id;
-
-      $hex = substr(hash('sha256', Crypt::randomBytes(2)), 0, 2);
-
-      $uuid = $next_id . '-' . $hex;
-
     }
     return $uuid;
 
@@ -75,7 +79,11 @@ class MarkaspotUuid implements UuidInterface {
    *   the node id.
    */
   protected function getLastNid() {
-    $last_id = db_query('SELECT MAX(nid) FROM {node}')->fetchField();
+
+    $nids = \Drupal::entityQuery('node')->condition('type', 'service_request')->execute();
+    $nodes = Node::loadMultiple($nids);
+    $last_id = count($nodes);
+    // $last_id = db_query('SELECT MAX(nid) FROM {node}')->fetchField();
     return $last_id;
   }
 

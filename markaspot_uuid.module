@@ -25,13 +25,6 @@ function markaspot_uuid_help($route_name, RouteMatchInterface $route_match) {
   }
 }
 
-/**
- * Implements hook_theme().
- */
-function markaspot_uuid_theme() {
-  $theme = [];
-  return $theme;
-}
 
 /**
  * Implements hook_entity_presave().
